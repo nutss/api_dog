@@ -1,3 +1,4 @@
+import 'package:api_dog/models/usersModel.dart';
 import 'package:flutter/material.dart';
 import 'package:api_dog/controllers/usersController.dart';
 import 'package:provider/provider.dart';
@@ -40,6 +41,7 @@ class usersFormScreen extends StatelessWidget {
         body: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Form(
+            key: formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -146,7 +148,35 @@ class usersFormScreen extends StatelessWidget {
                   color: Colors.blue,
                   textColor: Colors.white,
                   onPressed: () {
-                    Navigator.pop(context);
+                    if (formKey.currentState.validate()) {
+
+                      Users statement = Users(
+                        id: provider.userID,
+                        status: 'A',
+                        staffCode: staffCodeController.text,
+                        prefixT: prefixTController.text,
+                        nameT: nameTController.text,
+                        lastnameT: lastnameTController.text,
+                        division: '',
+                        department: '',
+                        company: '',
+                        score56: score56TController.text,
+                        score55: score55TController.text,
+                        score54: score54TController.text
+                      );
+
+                      if (provider.process == "INSERT") {
+
+                        provider.insertData(statement);
+                      }
+                      else {
+
+                        provider.updateData(statement);
+                      }
+
+                      Navigator.pop(context);
+
+                    }
                   },
                 )
               ],

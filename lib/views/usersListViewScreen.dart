@@ -64,6 +64,8 @@ class usersListViewScreen extends StatelessWidget {
                         user.id.toString() +
                         " " +
                         index.toString()),
+                    trailing: Icon(Icons.arrow_back),
+
                   ),
                 );
               });
