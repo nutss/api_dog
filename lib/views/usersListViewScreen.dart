@@ -59,11 +59,7 @@ class usersListViewScreen extends StatelessWidget {
                     ),
                     title: Text(
                         user.prefixT + "" + user.nameT + " " + user.lastnameT),
-                    subtitle: Text(user.staffCode +
-                        " " +
-                        user.id.toString() +
-                        " " +
-                        index.toString()),
+                    subtitle: Text(user.staffCode),
                     trailing: Icon(Icons.arrow_back),
 
                   ),
