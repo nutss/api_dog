@@ -3,6 +3,13 @@ import 'package:http/http.dart' as http;
 import 'package:api_dog/models/usersModel.dart';
 import 'package:flutter/foundation.dart';
 
+enum UsersState {
+  Initial,
+  Loading,
+  Loaded,
+  Error,
+}
+
 //Fetch data from Restful API
 Future<List<Users>> usersFetchAPI(http.Client client) async {
   var url = Uri.https('ec1.classicscan.co.th:4000', '/v1.0/hr1');
@@ -25,7 +32,16 @@ Future<List<Users>> usersFetchAPI(http.Client client) async {
   }
 }
 
-class UserProvider with ChangeNotifier {
+class UserProvider extends ChangeNotifier {
+  UsersState _usersState = UsersState.Initial;
+
+  UsersState get usersState => _usersState;
+
+  set usersState(UsersState newValue) {
+    _usersState = newValue;
+    notifyListeners();
+  }
+
   int _userID = 0;
 
   int get userID => _userID;
@@ -61,12 +77,19 @@ class UserProvider with ChangeNotifier {
 
   // ดึงข้อมูล
   void fetchData() async {
-    //ดึงข้อมูล API มาแสดงผล
-    final httpUsersFetchData = await usersFetchAPI(http.Client());
-    User = httpUsersFetchData;
+    try {
+      _usersState = UsersState.Loading;
+      //ดึงข้อมูล API มาแสดงผล
+      final httpUsersFetchData = await usersFetchAPI(http.Client());
+      User = httpUsersFetchData;
 
-    //แจ้งเตือน Consumer
-    notifyListeners();
+      //แจ้งเตือน Consumer
+      notifyListeners();
+      _usersState = UsersState.Loaded;
+    } catch (e) {
+
+      _usersState = UsersState.Error;
+    }
   }
 
   // Insert ข้อมูล
@@ -82,12 +105,9 @@ class UserProvider with ChangeNotifier {
     );
 
     if (response.statusCode == 200) {
-      //แจ้งเตือน Consumer
       fetchData();
     }
   }
-
-
 
   // Update ข้อมูล
   void updateData(Users statement) async {
@@ -107,5 +127,20 @@ class UserProvider with ChangeNotifier {
     }
   }
 
+  // Update ข้อมูล
+  void deleteData(Users statement) async {
+    var client = http.Client();
+    var url = Uri.https('ec1.classicscan.co.th:4000', '/v1.0/hr1');
+    var response = await client.delete(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(statement),
+    );
 
+    if (response.statusCode == 200) {
+      fetchData();
+    }
+  }
 }

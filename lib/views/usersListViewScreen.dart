@@ -1,10 +1,10 @@
 import 'package:api_dog/controllers/usersController.dart';
 import 'package:api_dog/views/usersFormScreen.dart';
+import 'package:api_dog/views/usersListViewSlideScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class usersListViewScreen extends StatelessWidget {
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -30,19 +30,43 @@ class usersListViewScreen extends StatelessWidget {
       ),
       body: Consumer(builder: (context, UserProvider provider, Widget child) {
         final users = provider.User;
-        int _selectedIndex = 0;
+        print(provider.usersState);
+        print(users.length);
 
-        if (users.length > -1) {
-          return ListView.builder(
-              itemCount: users.length,
-              itemBuilder: (context, int index) {
-                final user = users[index];
-                return Card(
+        if (provider.usersState == UsersState.Loading) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if ((provider.usersState == UsersState.Loaded) && (users.length == 0)) {
+          return Center(
+            child: Text(
+              "ไม่พบข้อมูล",
+              style: TextStyle(fontSize: 35),
+            ),
+          );
+        }
+
+        if (provider.usersState == UsersState.Error) {
+          return Center(
+            child: Text(
+              "มีข้อผิดพลาดกรุณาตรวจสอบระบบ Internet",
+              style: TextStyle(fontSize: 35),
+            ),
+          );
+        }
+
+        return ListView.builder(
+            itemCount: users.length,
+            itemBuilder: (context, int index) {
+              final user = users[index];
+              return SlidableWidget(
+                onDismissed: (action) =>
+                    dismissSlidableItem(context, index, action),
+                child: Card(
                   margin:
                       const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
                   elevation: 3,
                   child: ListTile(
-                    selected: index == _selectedIndex,
                     onTap: () {
                       provider.userID = user.id;
                       provider.userINDEX = index;
@@ -52,27 +76,23 @@ class usersListViewScreen extends StatelessWidget {
                           builder: (context) => usersFormScreen()));
                     },
                     leading: CircleAvatar(
-                      radius: 30,
+                      radius: 20,
                       child: FittedBox(
-                        child: Text(user.score56),
+                        fit: BoxFit.fill,
+                        child: Text(" " + user.score56 + " "),
                       ),
                     ),
                     title: Text(
                         user.prefixT + "" + user.nameT + " " + user.lastnameT),
                     subtitle: Text(user.staffCode),
-                    trailing: Icon(Icons.arrow_back),
-
+                    trailing: Icon(
+                      Icons.delete,
+                      color: Colors.grey,
+                    ),
                   ),
-                );
-              });
-        } else {
-          return Center(
-            child: Text(
-              "ไม่พบข้อมูล",
-              style: TextStyle(fontSize: 35),
-            ),
-          );
-        }
+                ),
+              );
+            });
       }),
     );
   }
